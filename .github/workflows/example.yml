@@ -32,7 +32,7 @@ jobs:
       - run: env
 
       # Execute Discovery. It will schedule builds on `worker` job below
-      - uses: DevPalace/phoenix-ci/discovery@v1
+      - uses: DevPalace/phoenix-ci/discovery@v1.1
         id: discovery
         with:
           # Attribute paths to search for targets
@@ -69,7 +69,7 @@ jobs:
             access-tokens = github.com=${{ github.token }}
 
       # Executes builds per each found target in discovery
-      - uses: DevPalace/phoenix-ci/worker@v1
+      - uses: DevPalace/phoenix-ci/worker@v1.1
         id: worker
         with:
           target: ${{ toJSON(matrix.target) }}

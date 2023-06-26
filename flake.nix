@@ -31,7 +31,7 @@
     {
 
       packages.x86_64-linux = {
-        test1 = pkgs.writeText "test1" "test1";
+        test1 = pkgs.pkgsMusl.nodePackages.sass;
         test2 = pkgs.writeText "test2" "test2";
 
         # Will not be build since it is already in nixpkgs

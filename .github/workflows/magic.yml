@@ -10,6 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            cores = 10
+            http-connections = 0
+            max-jobs = 10
+            max-substitution-jobs = 50
+
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix flake check
       - run: nix build .#test1 .#test2

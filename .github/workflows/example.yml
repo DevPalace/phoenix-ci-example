@@ -1,8 +1,6 @@
-name: 'Action Test'
-on: # rebuild any PRs and main branch changes
-
-  # Executing action on PR's is not supported. Somehow /nix/store cache gets corrupted. Will fix soon
-  #pull_request:
+name: 'Example'
+on:
+  pull_request:
   push:
     branches:
       - master
@@ -13,15 +11,7 @@ on: # rebuild any PRs and main branch changes
 jobs:
   discovery: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      hits: ${{ steps.discovery.outputs.hits }}
     steps:
-      # Checkout repository
-      - uses: actions/checkout@v3
-
       # Configure Nix
       - uses: nixbuild/nix-quick-install-action@v22
         with:
@@ -31,10 +21,8 @@ jobs:
             trusted-users = runner
             access-tokens = github.com=${{ github.token }}
 
-      - run: env
-
       # Execute Discovery. It will schedule builds on `worker` job below
-      - uses: DevPalace/phoenix-ci/discovery@v1
+      - uses: DevPalace/phoenix-ci/discovery@v1.1
         id: discovery
         with:
           # Attribute paths to search for targets
@@ -43,24 +31,19 @@ jobs:
           # Disable caching since discovery does not do much most of the time
           nixStoreCachingEnabled: false
           nixEvalCacheCachingEnabled: false
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+    outputs:
+      hits: ${{ steps.discovery.outputs.hits }}
+
 
   worker:
     name: "${{ matrix.target.attrPath }}"
     needs: [discovery]
-    permissions:
-      actions: read
-      contents: read
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         target: ${{ fromJSON(needs.discovery.outputs.hits) }}
     steps:
-      # Checkout repository
-      - uses: actions/checkout@v3
-
       # Configure Nix
       - uses: nixbuild/nix-quick-install-action@v22
         with:
@@ -71,10 +54,8 @@ jobs:
             access-tokens = github.com=${{ github.token }}
 
       # Executes builds per each found target in discovery
-      - uses: DevPalace/phoenix-ci/worker@v1
+      - uses: DevPalace/phoenix-ci/worker@v1.1
         id: worker
         with:
           target: ${{ toJSON(matrix.target) }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
